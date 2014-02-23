@@ -13,6 +13,13 @@ Methods currently supported are `ToEqual(value)`, `ToNotEqual(value)`, `ToBeNil(
 
 When multiple values are used to set up the expectation, only the first value is compared. This is largely meant to streamline functions which return an error.
 
+### []byte assertion
+
+    func TestSomething(t *testing.T) {
+      spec := gspec.New(t)
+      spec.ExpectBytes(aByteArray).ToEqual(1,3,4,5,6,7)
+    }
+
 ### Builers
 The library also includes builders for common objects:
 

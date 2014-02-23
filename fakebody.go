@@ -1,13 +1,13 @@
 package gspec
 
 import (
-  "bytes"
+	"bytes"
 )
 
 type FakeBody struct {
-  bytes.Buffer
+	bytes.Buffer
 }
 
 func (f *FakeBody) Close() error {
-  return nil
+	return nil
 }

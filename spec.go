@@ -3,6 +3,7 @@ package gspec
 import (
 	"reflect"
 	"testing"
+	"strings"
 )
 
 type S struct {
@@ -45,6 +46,25 @@ func (sr *SRB) ToEqual(expected ...byte) {
 		if b != expected[index] {
 			sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, expected[index], sr.actual[b])
 		}
+	}
+}
+
+func (sr *SR) ToContain(expected interface{}) {
+	sr.contains(expected, true)
+}
+
+func (sr *SR) ToNotContain(expected interface{}) {
+	sr.contains(expected, false)
+}
+
+func (sr *SR) contains(expected interface{}, b bool) {
+	switch actual := sr.actual.(type) {
+	case string:
+		if strings.Contains(actual, expected.(string)) != b {
+			sr.t.Errorf("Expected %q to not contain %q", actual, expected)
+		}
+	default:
+		sr.t.Errorf("trying to call [Not]Contains on an unsuported type")
 	}
 }
 

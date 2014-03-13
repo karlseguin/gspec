@@ -38,13 +38,20 @@ func (sr *SR) ToEqual(expected interface{}) {
 	}
 }
 
-func (sr *SRB) ToEqual(expected ...byte) {
-	if len(sr.actual) != len(expected) {
-		sr.t.Errorf("expected %d byte values, got %d", len(expected), len(sr.actual))
-	}
-	for index, b := range sr.actual {
-		if b != expected[index] {
-			sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, expected[index], sr.actual[b])
+func (sr *SRB) ToEqual(expected interface{}) {
+	switch x := expected.(type) {
+	case string:
+		if x != string(sr.actual) {
+			sr.t.Errorf("Expected %q, got %q", x, string(sr.actual))
+		}
+	case []byte:
+		if len(sr.actual) != len(x) {
+			sr.t.Errorf("expected %d byte values, got %d", len(x), len(sr.actual))
+		}
+		for index, b := range sr.actual {
+			if b != x[index] {
+				sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, x[index], sr.actual[b])
+			}
 		}
 	}
 }

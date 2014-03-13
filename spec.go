@@ -2,8 +2,8 @@ package gspec
 
 import (
 	"reflect"
-	"testing"
 	"strings"
+	"testing"
 )
 
 type S struct {
@@ -11,12 +11,12 @@ type S struct {
 }
 
 type SR struct {
-	t        *testing.T
+	t      *testing.T
 	actual interface{}
 }
 
 type SRB struct {
-	t        *testing.T
+	t      *testing.T
 	actual []byte
 }
 
@@ -29,30 +29,12 @@ func (s *S) Expect(actual interface{}, garbage ...interface{}) (sr *SR) {
 }
 
 func (s *S) ExpectBytes(actual []byte, garbage ...interface{}) (sr *SRB) {
-	return &SRB{s.t,actual}
+	return &SRB{s.t, actual}
 }
 
 func (sr *SR) ToEqual(expected interface{}) {
 	if sr.actual != expected {
 		sr.t.Errorf("expected %+v to equal %+v", expected, sr.actual)
-	}
-}
-
-func (sr *SRB) ToEqual(expected interface{}) {
-	switch x := expected.(type) {
-	case string:
-		if x != string(sr.actual) {
-			sr.t.Errorf("Expected %q, got %q", x, string(sr.actual))
-		}
-	case []byte:
-		if len(sr.actual) != len(x) {
-			sr.t.Errorf("expected %d byte values, got %d", len(x), len(sr.actual))
-		}
-		for index, b := range sr.actual {
-			if b != x[index] {
-				sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, x[index], sr.actual[b])
-			}
-		}
 	}
 }
 
@@ -65,14 +47,7 @@ func (sr *SR) ToNotContain(expected interface{}) {
 }
 
 func (sr *SR) contains(expected interface{}, b bool) {
-	switch actual := sr.actual.(type) {
-	case string:
-		if strings.Contains(actual, expected.(string)) != b {
-			sr.t.Errorf("Expected %q to not contain %q", actual, expected)
-		}
-	default:
-		sr.t.Errorf("trying to call [Not]Contains on an unsuported type")
-	}
+	contains(sr.t, sr.actual, expected, b)
 }
 
 func (sr *SR) ToNotEqual(expected interface{}) {
@@ -96,4 +71,45 @@ func (sr *SR) ToNotBeNil() {
 		return
 	}
 	sr.t.Errorf("expected %+v to not be nil", sr.actual)
+}
+
+func (sr *SRB) ToEqual(expected interface{}) {
+	switch x := expected.(type) {
+	case string:
+		if x != string(sr.actual) {
+			sr.t.Errorf("Expected %q, got %q", x, string(sr.actual))
+		}
+	case []byte:
+		if len(sr.actual) != len(x) {
+			sr.t.Errorf("expected %d byte values, got %d", len(x), len(sr.actual))
+		}
+		for index, b := range sr.actual {
+			if b != x[index] {
+				sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, x[index], sr.actual[b])
+			}
+		}
+	}
+}
+
+func (srb *SRB) ToContain(expected interface{}) {
+	srb.contains(expected, true)
+}
+
+func (srb *SRB) ToNotContain(expected interface{}) {
+	srb.contains(expected, false)
+}
+
+func (srb *SRB) contains(expected interface{}, b bool) {
+	contains(srb.t, string(srb.actual), expected, b)
+}
+
+func contains(t *testing.T, actual interface{}, expected interface{}, b bool) {
+	switch a := actual.(type) {
+	case string:
+		if strings.Contains(a, expected.(string)) != b {
+			t.Errorf("Expected %q to not contain %q", a, expected)
+		}
+	default:
+		t.Errorf("trying to call [Not]Contains on an unsuported type")
+	}
 }

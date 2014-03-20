@@ -32,9 +32,33 @@ func (s *S) ExpectBytes(actual []byte, garbage ...interface{}) (sr *SRB) {
 	return &SRB{s.t, actual}
 }
 
-func (sr *SR) ToEqual(expected interface{}) {
-	if sr.actual != expected {
-		sr.t.Errorf("expected %+v to equal %+v", expected, sr.actual)
+func (sr *SR) ToEqual(expecteds ...interface{}) {
+	kind := reflect.TypeOf(sr.actual).Kind()
+	if kind == reflect.Array || kind == reflect.Slice {
+		if len(expecteds) == 1 {
+			sr.compareArrays(expecteds[0])
+		} else {
+			sr.compareArrays(expecteds)
+		}
+		return
+	}
+	if sr.actual != expecteds[0] {
+		sr.t.Errorf("expected %+v to equal %+v", expecteds[0], sr.actual)
+	}
+}
+
+func (sr *SR) compareArrays(e interface{}) {
+	actual := reflect.ValueOf(sr.actual)
+	expected := reflect.ValueOf(e)
+	length := actual.Len()
+	if length != expected.Len() {
+		sr.t.Errorf("expected an array of %d values, got %d", expected.Len(), length)
+		return
+	}
+	for i := 0; i < length; i++ {
+		if actual.Index(i).Interface() != expected.Index(i).Interface() {
+			sr.t.Errorf("item at index %d should have been %q, got %q", i, expected.Index(i).Interface(), actual.Index(i).Interface())
+		}
 	}
 }
 

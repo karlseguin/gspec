@@ -131,7 +131,12 @@ func contains(t *testing.T, actual interface{}, expected interface{}, b bool) {
 	switch a := actual.(type) {
 	case string:
 		if strings.Contains(a, expected.(string)) != b {
-			t.Errorf("Expected %q to not contain %q", a, expected)
+			if b {
+				t.Errorf("Expected %q to contain %q", a, expected)
+			} else {
+				t.Errorf("Expected %q to not contain %q", a, expected)
+			}
+
 		}
 	default:
 		t.Errorf("trying to call [Not]Contains on an unsuported type")

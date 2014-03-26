@@ -4,6 +4,12 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"regexp"
+	"encoding/json"
+)
+
+var (
+	jsonFlattenPattern = regexp.MustCompile("\\s")
 )
 
 type S struct {
@@ -20,6 +26,11 @@ type SRB struct {
 	actual []byte
 }
 
+type SRJ struct {
+	t      *testing.T
+	actual interface{}
+}
+
 func New(t *testing.T) *S {
 	return &S{t: t}
 }
@@ -30,6 +41,10 @@ func (s *S) Expect(actual interface{}, garbage ...interface{}) (sr *SR) {
 
 func (s *S) ExpectBytes(actual []byte, garbage ...interface{}) (sr *SRB) {
 	return &SRB{s.t, actual}
+}
+
+func (s *S) ExpectJson(actual interface{}, garbage ...interface{}) (sr *SRJ) {
+	return &SRJ{s.t, actual}
 }
 
 func (sr *SR) ToEqual(expecteds ...interface{}) {
@@ -140,5 +155,31 @@ func contains(t *testing.T, actual interface{}, expected interface{}, b bool) {
 		}
 	default:
 		t.Errorf("trying to call [Not]Contains on an unsuported type")
+	}
+}
+
+func (sr *SRJ) ToEqual(expected string) {
+	b, ok := sr.actual.([]byte)
+	if ok == false {
+		if sb, ok := sr.actual.(string); ok == false {
+			sr.t.Errorf("JSON must be a []byte or string")
+			return
+		} else {
+			b = []byte(sb)
+		}
+
+	}
+	actualMap := make(map[string]interface{})
+	expectedMap := make(map[string]interface{})
+	if err := json.Unmarshal(b, &actualMap); err != nil {
+		sr.t.Error(err)
+		return
+	}
+	if err := json.Unmarshal([]byte(expected), &expectedMap); err != nil {
+		sr.t.Error(err)
+		return
+	}
+	if reflect.DeepEqual(actualMap, expectedMap) == false {
+		sr.t.Errorf("Expected %s got %s", jsonFlattenPattern.ReplaceAllLiteralString(expected, ""), jsonFlattenPattern.ReplaceAllLiteralString(string(b), ""))
 	}
 }

@@ -180,6 +180,6 @@ func (sr *SRJ) ToEqual(expected string) {
 		return
 	}
 	if reflect.DeepEqual(actualMap, expectedMap) == false {
-		sr.t.Errorf("Expected %s got %s", jsonFlattenPattern.ReplaceAllLiteralString(expected, ""), jsonFlattenPattern.ReplaceAllLiteralString(string(b), ""))
+		sr.t.Errorf("Expected:\n%s\nto equal\n%s", jsonFlattenPattern.ReplaceAllLiteralString(expected, ""), jsonFlattenPattern.ReplaceAllLiteralString(string(b), ""))
 	}
 }

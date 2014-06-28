@@ -124,7 +124,7 @@ func (sr *SRB) ToEqual(expected interface{}) {
 		}
 		for index, b := range sr.actual {
 			if b != x[index] {
-				sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, x[index], sr.actual[b])
+				sr.t.Errorf("Byte %d mismatch, expected %d got %d", index, x[index], b)
 			}
 		}
 	}

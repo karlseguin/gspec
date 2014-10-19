@@ -1,6 +1,9 @@
 ### Gspec
 A thin helper around `testing.T` to make writing tests in Go slightly less painful.
 
+**UPDATE:** Checkout <https://github.com/karlseguin/expect> for a [better?] alternative to gspec.
+
+
 ### Expect
 The main purpose of this library is to streamline the `if false { t.Error(...) }` code which litters Go tests. This is achieved by wrapping the built-in `*T`* class:
 
